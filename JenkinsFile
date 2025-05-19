@@ -11,6 +11,8 @@ pipeline {
                 script {
                     def changes = sh(script: "git diff --name-only HEAD HEAD~1", returnStdout: true).trim()
                     echo "Changed files:\n${changes}"
+                    echo "Number of changed files: ${changes.split('\n').length}"
+                    def changedFiles = changes.split('\n')
                 }
             }
         }
