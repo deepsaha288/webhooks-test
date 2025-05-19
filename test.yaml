@@ -14,5 +14,3 @@ resources:
           Value: !Ref Environment
         - Key: Project
           Value: !Ref Project
-        - Key: Owner
-          Value: !Ref Owner
