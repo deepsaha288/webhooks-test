@@ -9,10 +9,19 @@ pipeline {
         stage('Show Changes') {
             steps {
                 script {
-                    def changes = sh(script: "git diff --name-only HEAD HEAD~1", returnStdout: true).trim()
-                    echo "Changed files:\n${changes}"
-                    echo "Number of changed files: ${changes.split('\n').length}"
-                    def changedFiles = changes.split('\n')
+                    // Fetch the last commit so that HEAD~1 is available
+                    sh 'git fetch origin main'
+                    
+                    // Make sure there are at least two commits to diff
+                    def commitCount = sh(script: 'git rev-list --count HEAD', returnStdout: true).trim().toInteger()
+                    
+                    if (commitCount > 1) {
+                        def changes = sh(script: "git diff --name-only HEAD~1 HEAD", returnStdout: true).trim()
+                        echo "Changed files:\n${changes}"
+                        echo "Number of changed files: ${changes.split('\n').length}"
+                    } else {
+                        echo "Only one commit exists. No diff available yet."
+                    }
                 }
             }
         }
