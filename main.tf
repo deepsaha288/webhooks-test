@@ -3,7 +3,7 @@ resource "s3_bucket_name" "test-bucket" {
     region = var.s3_bucket_region
     tags = {
         Name        = "TestBucket"
-        Environment = "Test"
+        Environment = "dev"
     }
 
 }
