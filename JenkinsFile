@@ -6,26 +6,36 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/deepsaha288/webhooks-test.git'
             }
         }
-        stage('Show Changes') {
+
+        stage('Detect Changes') {
             steps {
                 script {
-                    sh 'git fetch origin main'
-                    
+                    // Ensure at least 2 commits are available for diff
                     def commitCount = sh(script: 'git rev-list --count HEAD', returnStdout: true).trim().toInteger()
-                    
+
                     if (commitCount > 1) {
+                        // Get changed files and save to a file
                         def changes = sh(script: "git diff --name-only HEAD~1 HEAD", returnStdout: true).trim()
-                        
-                        // Save the changed files to a file in the workspace
-                        writeFile file: 'changed_files.txt', text: changes
-                        
                         echo "Changed files:\n${changes}"
+                        
+                        // Write to a file in workspace
+                        writeFile file: 'changed_files.txt', text: changes
+
+                        // Also log the count
                         echo "Number of changed files: ${changes.split('\n').length}"
                     } else {
-                        echo "Only one commit exists. No diff available yet."
+                        echo "Only one commit exists. No diff available."
+                        writeFile file: 'changed_files.txt', text: 'Only one commit exists. No diff available.'
                     }
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            // Archive the result so you can download it from the Jenkins UI
+            archiveArtifacts artifacts: 'changed_files.txt', onlyIfSuccessful: true
         }
     }
 }
