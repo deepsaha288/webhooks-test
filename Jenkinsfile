@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     environment {
-        PYTHON_PATH = 'C:\\Users\\ZMO-WIN-DeepS-01\\AppData\\Local\\Programs\\Python\\Python311\\python.exe' // update your Python path
+        PYTHON_PATH = 'C:\\Users\\ZMO-WIN-DeepS-01\\AppData\\Local\\Microsoft\\WindowsApps\\python3.exe' // update your Python path
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout') {  Microsoft\WindowsApps\python3.exe
             steps {
                 git url: 'https://github.com/deepsaha288/webhooks-test.git', branch: 'main'
             }
