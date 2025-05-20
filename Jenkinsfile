@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        PYTHON_PATH = 'C:\Users\ZMO-WIN-DeepS-01\AppData\Local\Programs\Python\Python312\python.exe' // update your Python path
+        PYTHON_PATH = 'C:\\Users\\ZMO-WIN-DeepS-01\\AppData\\Local\\Programs\\Python\\Python311\\python.exe' // update your Python path
     }
 
     stages {
