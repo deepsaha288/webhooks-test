@@ -1,20 +1,33 @@
 pipeline {
     agent any
 
-    environment {
-        PYTHON_PATH = 'C:\\Users\\ZMO-WIN-DeepS-01\\AppData\\Local\\Microsoft\\WindowsApps\\python3.exe' // update your Python path
-    }
-
     stages {
-        stage('Checkout') {  Microsoft\WindowsApps\python3.exe
+        stage('Checkout') {
             steps {
                 git url: 'https://github.com/deepsaha288/webhooks-test.git', branch: 'main'
             }
         }
 
-        stage('Run Python Script') {
+        stage('Detect Changed Projects') {
             steps {
-                bat "${env.PYTHON_PATH} detect_changes.py"
+                script {
+                    // Run git diff and get changed files between last two commits
+                    def diffOutput = bat(returnStdout: true, script: '''
+                        git diff --name-only HEAD~1 HEAD
+                    ''')
+
+                    // Split output lines and extract top-level directory/project names
+                    def projects = diffOutput.readLines()
+                        .findAll { it.trim() != '' }
+                        .collect { it.split('/')[0] }
+                        .unique()
+
+                    // Print the changed projects
+                    echo "Changed projects:\n${projects.join('\\n')}"
+
+                    // Optionally save to file
+                    writeFile file: 'changed_projects.txt', text: projects.join('\n')
+                }
             }
         }
 
@@ -22,7 +35,7 @@ pipeline {
             steps {
                 script {
                     def changed = readFile('changed_projects.txt').trim()
-                    echo "Changed Projects:\n${changed}"
+                    echo "Changed Projects from file:\n${changed}"
                 }
             }
         }
