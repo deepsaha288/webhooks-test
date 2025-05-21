@@ -40,4 +40,17 @@ pipeline {
             }
         }
     }
+
+// Post actions can be added here if needed
+    post {
+        always {
+            echo 'This will always run after the pipeline.'
+        }
+        success {
+            echo 'This will run only if the pipeline is successful.'
+        }
+        failure {
+            echo 'This will run only if the pipeline fails.'
+        }
+    }
 }
