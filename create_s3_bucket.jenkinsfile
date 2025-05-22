@@ -1,26 +1,33 @@
 pipeline {
     agent any
 
-    environment {
-        AWS_ACCESS_KEY_ID     = credentials('aws-creds').username
-        AWS_SECRET_ACCESS_KEY = credentials('aws-creds').password
-    }
-
     parameters {
         string(name: 'S3_BUCKET_NAME', description: 'S3 Bucket Name')
         string(name: 'STACK_NAME', description: 'CloudFormation Stack Name')
         string(name: 'AWS_REGION', defaultValue: 'us-east-1', description: 'AWS Region')
         string(name: 'KMS_ARN', description: 'KMS ARN Key')
+        string(name: 'CREDENTIAL_ID', description: 'Jenkins AWS Credential ID')
+    }
+
+    environment {
+        AWS_ACCESS_KEY_ID     = credentials(params.CREDENTIAL_ID).username
+        AWS_SECRET_ACCESS_KEY = credentials(params.CREDENTIAL_ID).password
     }
 
     stages {
-        stage('Run Script') {
+        stage('Git Checkout') {
+            steps {
+                git url: 'https://github.com/deepsaha288/webhooks-test.git', branch: 'main'
+            }
+        }
+
+        stage('Create S3 Bucket') {
             steps {
                 script {
                     bat """
                     set AWS_ACCESS_KEY_ID=%AWS_ACCESS_KEY_ID%
                     set AWS_SECRET_ACCESS_KEY=%AWS_SECRET_ACCESS_KEY%
-                    
+
                     python -W ignore core\\scripts\\createBootstrapS3Bucket.py ^
                     --s3BucketName %S3_BUCKET_NAME% ^
                     --stackName %STACK_NAME% ^
