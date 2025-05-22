@@ -15,9 +15,9 @@ pipeline {
     }
 
     stages {
-        stage('Git Checkout') {
+        stage('Checkout Code') {
             steps {
-                git url: 'https://github.com/deepsaha288/webhooks-test.git', branch: 'main'
+                git url: 'https://deepsaha288/webhooks-test.git', branch: 'main'
             }
         }
 
@@ -27,7 +27,7 @@ pipeline {
                     bat """
                     set AWS_ACCESS_KEY_ID=%AWS_ACCESS_KEY_ID%
                     set AWS_SECRET_ACCESS_KEY=%AWS_SECRET_ACCESS_KEY%
-
+                    
                     python -W ignore core\\scripts\\createBootstrapS3Bucket.py ^
                     --s3BucketName %S3_BUCKET_NAME% ^
                     --stackName %STACK_NAME% ^

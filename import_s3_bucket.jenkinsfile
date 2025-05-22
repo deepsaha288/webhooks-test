@@ -10,21 +10,21 @@ pipeline {
     }
 
     environment {
-        CREDENTIAL_ID = ""
+        CREDENTIAL_ID = ''
     }
 
     stages {
-        stage('Determine Credentials') {
+        stage('Determine Credential') {
             steps {
                 script {
                     if (params.ENVIRONMENT == 'dev') {
-                        env.CREDENTIAL_ID = 'aws-creds-dev'
+                        env.CREDENTIAL_ID = 'aws-creds'
                     } else if (params.ENVIRONMENT == 'stage') {
                         env.CREDENTIAL_ID = 'aws-creds-stage'
                     } else if (params.ENVIRONMENT == 'prod') {
                         env.CREDENTIAL_ID = 'aws-creds-prod'
                     } else {
-                        error "Unsupported environment: ${params.ENVIRONMENT}"
+                        error "Invalid environment!"
                     }
                 }
             }
