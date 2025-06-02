@@ -61,7 +61,3 @@ jobs:
           --AWSRegion "${{ inputs.AWS_REGION }}" \
           --KMSEncryptionKeyARN "${{ inputs.KMS_ARN }}"
         echo "S3 bucket creation script executed successfully."
-        
-    - name: Output S3 Bucket Name
-      run: echo "S3 Bucket Name: ${{ inputs.S3_BUCKET_NAME }}"
-      id: output
