@@ -2,20 +2,19 @@ pipeline {
     agent any
 
     parameters {
-        string(name: 'S3_BUCKET_NAME', description: 'S3 Bucket Name')
-        string(name: 'STACK_NAME', description: 'CloudFormation Stack Name')
+        string(name: 'S3_BUCKET_NAME', description: 'S3 Bucket Name to Delete')
+        string(name: 'STACK_NAME', description: 'CloudFormation Stack Name (optional, for tracking)')
         string(name: 'AWS_REGION', description: 'AWS Region')
-        string(name: 'KMS_ARN', description: 'KMS ARN Key')
         string(name: 'CREDENTIAL_ID', description: 'Jenkins AWS Credential ID')
     }
 
     environment {
-        SCRIPT_PATH = 'C:\\Users\\ZMO-WIN-DeepS-01\\OneDrive - zimetrics.com\\Desktop\\devops\\core\\scripts\\createBootstrapS3Bucket.py'
+        SCRIPT_PATH = 'C:\\Users\\ZMO-WIN-DeepS-01\\OneDrive - zimetrics.com\\Desktop\\devops\\core\\scripts\\deleteS3Bucket.py'
         PYTHON_EXE = 'C:\\Users\\ZMO-WIN-DeepS-01\\AppData\\Local\\Programs\\Python\\Python312\\python.exe'
     }
 
     stages {
-        stage('Create S3 Bucket') {
+        stage('Delete S3 Bucket') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: "${params.CREDENTIAL_ID}", usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
@@ -26,8 +25,7 @@ pipeline {
                         "%PYTHON_EXE%" -W ignore "%SCRIPT_PATH%" ^
                         --s3BucketName %S3_BUCKET_NAME% ^
                         --stackName %STACK_NAME% ^
-                        --AWSRegion %AWS_REGION% ^
-                        --KMSEncryptionKeyARN %KMS_ARN%
+                        --AWSRegion %AWS_REGION%
                         """
                     }
                 }

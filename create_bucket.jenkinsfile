@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+
+    parameters {
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'stage', 'prod'], description: 'Target environment')
+        string(name: 'S3_BUCKET_NAME', defaultValue: 'jenkins-test-bucket', description: 'S3 Bucket Name')
+        string(name: 'STACK_NAME', defaultValue: 'jenkins-test', description: 'CloudFormation Stack Name')
+        string(name: 'AWS_REGION', defaultValue: 'eu-central-1', description: 'AWS Region')
+        string(name: 'KMS_ARN', defaultValue: 'arn:aws:kms:eu-central-1:661623416131:key/7be0bf9b-caea-44ff-96e5-d649170bf876', description: 'KMS ARN Key')
+    }
+
+    stages {
+        stage('Determine Credential and Trigger S3 Bucket Creation') {
+            steps {
+                script {
+                    def credentialId = ''
+                    if (params.ENVIRONMENT == 'dev') {
+                        credentialId = 'aws-creds-dev'
+                    } else if (params.ENVIRONMENT == 'stage') {
+                        credentialId = 'aws-creds-stage'
+                    } else if (params.ENVIRONMENT == 'prod') {
+                        credentialId = 'aws-creds-prod'
+                    } else {
+                        error "Invalid environment!"
+                    }
+
+                    build job: 'create-s3-bucket', parameters: [
+                        string(name: 'S3_BUCKET_NAME', value: params.S3_BUCKET_NAME),
+                        string(name: 'STACK_NAME', value: params.STACK_NAME),
+                        string(name: 'AWS_REGION', value: params.AWS_REGION),
+                        string(name: 'KMS_ARN', value: params.KMS_ARN),
+                        string(name: 'CREDENTIAL_ID', value: credentialId)
+                    ]
+                }
+            }
+        }
+    }   
+}

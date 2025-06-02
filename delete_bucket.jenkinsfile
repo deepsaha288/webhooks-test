@@ -1,0 +1,36 @@
+pipeline {
+    agent any
+
+    parameters {
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'stage', 'prod'], description: 'Target environment')
+        string(name: 'S3_BUCKET_NAME', defaultValue: 'jenkins-test-bucket', description: 'S3 Bucket Name to Delete')
+        string(name: 'STACK_NAME', defaultValue: 'jenkins-test', description: 'CloudFormation Stack Name (for tracking)')
+        string(name: 'AWS_REGION', defaultValue: 'eu-central-1', description: 'AWS Region')
+    }
+
+    stages {
+        stage('Determine Credential and Trigger S3 Bucket Deletion') {
+            steps {
+                script {
+                    def credentialId = ''
+                    if (params.ENVIRONMENT == 'dev') {
+                        credentialId = 'aws-creds-dev'
+                    } else if (params.ENVIRONMENT == 'stage') {
+                        credentialId = 'aws-creds-stage'
+                    } else if (params.ENVIRONMENT == 'prod') {
+                        credentialId = 'aws-creds-prod'
+                    } else {
+                        error "Invalid environment!"
+                    }
+
+                    build job: 'delete-s3-bucket', parameters: [
+                        string(name: 'S3_BUCKET_NAME', value: params.S3_BUCKET_NAME),
+                        string(name: 'STACK_NAME', value: params.STACK_NAME),
+                        string(name: 'AWS_REGION', value: params.AWS_REGION),
+                        string(name: 'CREDENTIAL_ID', value: credentialId)
+                    ]
+                }
+            }
+        }
+    }
+}
