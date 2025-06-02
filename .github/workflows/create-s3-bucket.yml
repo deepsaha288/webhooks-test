@@ -1,63 +1,43 @@
 name: Create S3 Bucket
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       S3_BUCKET_NAME:
         required: true
-        type: string
       STACK_NAME:
         required: true
-        type: string
       AWS_REGION:
         required: true
-        type: string
       KMS_ARN:
         required: true
-        type: string
-      CREDENTIAL_ID:
-        required: true
-        type: string
 
 jobs:
-  create-s3:
+  create:
     runs-on: ubuntu-latest
-    env:
-      AWS_REGION: ${{ inputs.AWS_REGION }}
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout Repo
+        uses: actions/checkout@v4
 
-    - name: Set AWS credentials
-      run: |
-        if [[ "${{ inputs.CREDENTIAL_ID }}" == "aws-creds-dev" ]]; then
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID_DEV }}" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}" >> $GITHUB_ENV
-        elif [[ "${{ inputs.CREDENTIAL_ID }}" == "aws-creds-stage" ]]; then
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID_STAGE }}" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY_STAGE }}" >> $GITHUB_ENV
-        elif [[ "${{ inputs.CREDENTIAL_ID }}" == "aws-creds-prod" ]]; then
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID_PROD }}" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}" >> $GITHUB_ENV
-        else
-          echo "Invalid credential ID"
-          exit 1
-        fi
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
+      - name: Install boto3
+        run: pip install boto3
 
-    - name: Install boto3 (if needed)
-      run: pip install boto3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.AWS_REGION }}
 
-    - name: Run S3 Creation Script
-      run: |
-        python core/scripts/createBootstrapS3Bucket.py \
-          --s3BucketName "${{ inputs.S3_BUCKET_NAME }}" \
-          --stackName "${{ inputs.STACK_NAME }}" \
-          --AWSRegion "${{ inputs.AWS_REGION }}" \
-          --KMSEncryptionKeyARN "${{ inputs.KMS_ARN }}"
-        echo "S3 bucket creation script executed successfully."
+      - name: Run S3 Creation Script
+        run: |
+          python core/scripts/createBootstrapS3Bucket.py \
+            --s3BucketName "${{ inputs.S3_BUCKET_NAME }}" \
+            --stackName "${{ inputs.STACK_NAME }}" \
+            --AWSRegion "${{ inputs.AWS_REGION }}" \
+            --KMSEncryptionKeyARN "${{ inputs.KMS_ARN }}"

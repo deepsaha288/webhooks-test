@@ -1,67 +1,39 @@
-name: Trigger Create S3 Bucket
+name: S3 Trigger Workflow
 
 on:
   workflow_dispatch:
     inputs:
-      ENVIRONMENT:
-        description: 'Environment'
-        required: true
-        default: 'dev'
-        type: choice
-        options:
-          - dev
-          - stage
-          - prod
       S3_BUCKET_NAME:
         description: 'S3 Bucket Name'
         required: true
-        default: 'jenkins-test-bucket'
       STACK_NAME:
-        description: 'Stack Name'
+        description: 'CloudFormation Stack Name'
         required: true
-        default: 'jenkins-test'
       AWS_REGION:
         description: 'AWS Region'
         required: true
-        default: 'us-east-1'
       KMS_ARN:
         description: 'KMS ARN'
         required: true
-        default: 'arn:aws:kms:us-east-1:844216228372:key/9d16055d-df34-4ed4-af25-b5cedc9ece13'
+      CREDENTIAL_ID:
+        description: 'Not used directly here'
+        required: false
 
 jobs:
-  trigger-s3-bucket:
+  trigger-create-s3:
     runs-on: ubuntu-latest
     steps:
-      - name: Decide Credential ID
-        id: creds
-        run: |
-          if [[ "${{ github.event.inputs.ENVIRONMENT }}" == "dev" ]]; then
-            echo "CREDENTIAL_ID=aws-creds-dev" >> $GITHUB_OUTPUT
-          elif [[ "${{ github.event.inputs.ENVIRONMENT }}" == "stage" ]]; then
-            echo "CREDENTIAL_ID=aws-creds-stage" >> $GITHUB_OUTPUT
-          elif [[ "${{ github.event.inputs.ENVIRONMENT }}" == "prod" ]]; then
-            echo "CREDENTIAL_ID=aws-creds-prod" >> $GITHUB_OUTPUT
-          else
-            echo "Invalid environment"
-            exit 1
-          fi
-
-      - name: Trigger S3 Creation Workflow
-        uses: actions/github-script@v7
+      - name: Trigger S3 Bucket Creation Workflow
+        uses: peter-evans/workflow-dispatch@v1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'create-s3-bucket.yml',
-              ref: 'main',
-              inputs: {
-                S3_BUCKET_NAME: "${{ github.event.inputs.S3_BUCKET_NAME }}",
-                STACK_NAME: "${{ github.event.inputs.STACK_NAME }}",
-                AWS_REGION: "${{ github.event.inputs.AWS_REGION }}",
-                KMS_ARN: "${{ github.event.inputs.KMS_ARN }}",
-                CREDENTIAL_ID: "${{ steps.creds.outputs.CREDENTIAL_ID }}"
-              }
-            })
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          repository: deepsaha288/webhooks-test
+          workflow: create-s3-bucket.yml
+          ref: main
+          inputs: |
+            {
+              "S3_BUCKET_NAME": "${{ github.event.inputs.S3_BUCKET_NAME }}",
+              "STACK_NAME": "${{ github.event.inputs.STACK_NAME }}",
+              "AWS_REGION": "${{ github.event.inputs.AWS_REGION }}",
+              "KMS_ARN": "${{ github.event.inputs.KMS_ARN }}"
+            }
