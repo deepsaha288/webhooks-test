@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger S3 Bucket Creation Workflow
-        uses: peter-evans/workflow-dispatch@v1
+        uses: peter-evans/workflow-dispatch@v2
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           repository: deepsaha288/webhooks-test
@@ -37,3 +37,4 @@ jobs:
               "AWS_REGION": "${{ github.event.inputs.AWS_REGION }}",
               "KMS_ARN": "${{ github.event.inputs.KMS_ARN }}"
             }
+
