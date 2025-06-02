@@ -55,12 +55,13 @@ jobs:
 
     - name: Run S3 Creation Script
       run: |
-        python scripts/createBootstrapS3Bucket.py \
+        python core/scripts/createBootstrapS3Bucket.py \
           --s3BucketName "${{ inputs.S3_BUCKET_NAME }}" \
           --stackName "${{ inputs.STACK_NAME }}" \
           --AWSRegion "${{ inputs.AWS_REGION }}" \
           --KMSEncryptionKeyARN "${{ inputs.KMS_ARN }}"
         echo "S3 bucket creation script executed successfully."
+        
     - name: Output S3 Bucket Name
       run: echo "S3 Bucket Name: ${{ inputs.S3_BUCKET_NAME }}"
       id: output

@@ -23,11 +23,11 @@ on:
       AWS_REGION:
         description: 'AWS Region'
         required: true
-        default: 'eu-central-1'
+        default: 'us-east-1'
       KMS_ARN:
         description: 'KMS ARN'
         required: true
-        default: 'arn:aws:kms:eu-central-1:XXXX'
+        default: 'arn:aws:kms:us-east-1:844216228372:key/9d16055d-df34-4ed4-af25-b5cedc9ece13'
 
 jobs:
   trigger-s3-bucket:
